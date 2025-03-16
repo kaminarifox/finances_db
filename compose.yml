@@ -1,0 +1,45 @@
+services:
+
+  manager:
+    image: node:22-alpine
+    user: "node"
+    working_dir: /home/node/app
+    volumes:
+      - ./manager:/home/node/app
+      - ./extractions:/home/node/app/extractions
+    command: "npm run start"
+    env_file: .env
+
+  postgresql:
+    image: docker.io/bitnami/postgresql:17
+    volumes:
+      - 'postgresql_data:/bitnami/postgresql'
+    env_file: .env
+
+
+  pgadmin:
+    image: dpage/pgadmin4:9
+    ports:
+      - '8081:80'
+    volumes:
+      - 'pgadmin_data:/var/lib/pgadmin'
+    env_file: .env
+
+  metabase:
+    image: metabase/metabase
+    ports:
+      - '3000:3000'
+    volumes:
+      - /dev/urandom:/dev/random:ro
+    env_file: .env
+
+
+volumes:
+  postgresql_data:
+    name: finances_db_postgresql_data
+  pgadmin_data:
+    name: finances_db_pgadmin_data
+
+networks:
+  default:
+    name: finances_db
