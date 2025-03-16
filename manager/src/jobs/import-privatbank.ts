@@ -1,5 +1,10 @@
 import { CronJob } from "cron"
-import { parse } from '@fast-csv/parse';
-import { TransactionMonobank } from "../entity/TransactionMonobank";
 
-export const importPrivatbankJob = CronJob.from({})
+export const importPrivatbankJob = CronJob.from({
+    cronTime: '0 * * * * *',
+    onTick: async function () {
+
+    },
+    waitForCompletion: true,
+    timeZone: 'Europe/Kyiv'
+});

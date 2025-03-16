@@ -1,6 +1,7 @@
 import "reflect-metadata"
 import { DataSource } from "typeorm"
-import { TransactionMonobank } from "./entity/TransactionMonobank"
+import { TransactionMonobank } from "./entity/transaction_monobank"
+import { SnakeNamingStrategy } from "./helpers/snake-naming-strategy"
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -13,4 +14,5 @@ export const AppDataSource = new DataSource({
     entities: [TransactionMonobank],
     migrations: [],
     subscribers: [],
+    namingStrategy: new SnakeNamingStrategy(),
 })

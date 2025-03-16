@@ -18,6 +18,7 @@
    "scripts": {
       "prestart": "npm install",
       "start": "ts-node src/index.ts",
+      "start:dev": "ts-node-dev --respawn --transpile-only src/index.ts",
       "typeorm": "typeorm-ts-node-commonjs"
    }
 }
