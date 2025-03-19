@@ -5,9 +5,9 @@ services:
     user: "node"
     working_dir: /home/node/app
     volumes:
-      - ./manager:/home/node/app
-      - ./extractions:/home/node/app/extractions
-    command: "npm run start"
+      - ./manager:/home/node/app:bind
+      - ./extractions:/home/node/app/extractions:bind
+    command: "npm run start:dev"
     env_file: .env
 
   postgresql:

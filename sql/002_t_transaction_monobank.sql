@@ -10,11 +10,12 @@ create table transaction_monobank (
     commission_amount DECIMAL(16, 4),
     cashback_amount DECIMAL(16, 4),
     balance_after DECIMAL(16, 4),
+    checksum TEXT not null unique,
     created_at TIMESTAMP default current_timestamp,
     updated_at TIMESTAMP default current_timestamp
 );
 
-comment on column transaction_monobank.transaction_monobank_id is 'Унікальний ідентифікатор транзакції';
+comment on column transaction_monobank.transaction_monobank_id is 'ID';
 
 comment on column transaction_monobank.operation_date is 'Дата і час операції';
 
@@ -35,6 +36,8 @@ comment on column transaction_monobank.commission_amount is 'Сума коміс
 comment on column transaction_monobank.cashback_amount is 'Сума кешбеку (UAH)';
 
 comment on column transaction_monobank.balance_after is 'Залишок після операції (UAH)';
+
+comment on column transaction_monobank.checksum is 'Контрольна сума транзакції';
 
 comment on column transaction_monobank.created_at is 'Дата створення запису';
 

@@ -10,11 +10,12 @@ create table transaction_privatbank (
     operation_currency text,
     balance_after decimal(16, 4),
     balance_currency text,
+    checksum text,
     created_at TIMESTAMP default current_timestamp,
     updated_at TIMESTAMP default current_timestamp
 );
 
-comment on column transaction_privatbank.transaction_privatbank_id is 'UUID';
+comment on column transaction_privatbank.transaction_privatbank_id is 'ID';
 
 comment on column transaction_privatbank.category is 'Категорія';
 
@@ -35,6 +36,8 @@ comment on column transaction_privatbank.balance_after is 'Залишок на �
 comment on column transaction_privatbank.balance_currency is 'Валюта залишку';
 
 comment on column transaction_privatbank.operation_date is 'Дата транзакції';
+
+comment on column transaction_monobank.checksum is 'Контрольна сума транзакції';
 
 comment on column transaction_privatbank.created_at is 'Дата створення запису';
 

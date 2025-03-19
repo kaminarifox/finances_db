@@ -1,14 +1,15 @@
-import { BaseEntity, Column, CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
+@Entity()
 export class ExtractionLog extends BaseEntity {
     @PrimaryGeneratedColumn()
     extractionLogId: number
 
     @Column()
-    filename: string;
+    path: string;
 
     @Column()
-    sha256sum: string;
+    checksum: string;
 
     @CreateDateColumn()
     createdAt: Date;

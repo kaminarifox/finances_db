@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, UpdateDateColumn, CreateDateColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, UpdateDateColumn, CreateDateColumn, BeforeInsert } from "typeorm"
+import { sha256sum } from "../helpers/sha256sum"
 
 @Entity()
 export class TransactionMonobank extends BaseEntity {
@@ -35,9 +36,20 @@ export class TransactionMonobank extends BaseEntity {
     @Column()
     balanceAfter: number
 
+    @Column()
+    checksum: string
+
     @CreateDateColumn()
     createdAt: Date
 
     @UpdateDateColumn()
     updatedAt: Date
+
+    @BeforeInsert()
+    async setChecksum() {
+        this.checksum = await sha256sum(
+            `${this.operationDate.getDate()}_${this.mcc}_${this.amount}_${this.balanceAfter}`,
+            false
+        )
+    }
 }
