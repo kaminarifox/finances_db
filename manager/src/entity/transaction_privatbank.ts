@@ -1,54 +1,55 @@
 import { BaseEntity, BeforeInsert, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
-import { sha256sum } from "../helpers/sha256sum"
+import { Helpers } from "../helpers"
+
 
 @Entity()
 export class TransactionPrivatbank extends BaseEntity {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({comment: 'ID'})
     transactionPrivatbankId: number
 
-    @Column()
+    @Column({comment: 'Дата і час операції'})
     operationDate: Date
 
-    @Column()
+    @Column({comment: 'Категорія'})
     category: string
 
-    @Column()
+    @Column({comment: 'Номер картки'})
     cardNumber: string
 
-    @Column()
+    @Column({comment: 'Опис операції'})
     memo: string
 
-    @Column()
+    @Column({type: 'decimal', precision: 16, scale: 4, comment: 'Сума у валюті картки'})
     amount: number
 
-    @Column()
+    @Column({comment: 'Валюта картки'})
     currency: string
 
-    @Column()
+    @Column({type: 'decimal', precision: 16, scale: 4, comment: 'Сума у валюті транзакції'})
     operationAmount: number
 
-    @Column()
+    @Column({ comment: 'Валюта транзакції'})
     operationCurrency: string
 
-    @Column()
+    @Column({type: 'decimal', precision: 16, scale: 4, comment: 'Залишок на кінець періоду'})
     balanceAfter: number
 
-    @Column()
+    @Column({comment: 'Валюта залишку'})
     balanceCurrency: string
 
-    @Column()
+    @Column({comment: 'Контрольна сума транзакції', unique: true})
     checksum: string
 
-    @CreateDateColumn()
+    @CreateDateColumn({comment: 'Дата створення запису'})
     createdAt: Date
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({comment: 'Дата останнього оновлення запису'})
     updatedAt: Date
 
     @BeforeInsert()
     async setChecksum() {
-        this.checksum = await sha256sum(
-            `${this.operationDate.getDate()}_${this.category}_${this.amount}_${this.balanceAfter}`,
+        this.checksum = await Helpers.sha256sum(
+            `${this.operationDate}_${this.category}_${this.amount}_${this.balanceAfter}`,
             false
         )
     }

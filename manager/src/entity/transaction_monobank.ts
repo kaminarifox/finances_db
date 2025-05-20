@@ -1,53 +1,53 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, UpdateDateColumn, CreateDateColumn, BeforeInsert } from "typeorm"
-import { sha256sum } from "../helpers/sha256sum"
+import { Helpers } from "../helpers"
 
 @Entity()
 export class TransactionMonobank extends BaseEntity {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({comment: 'ID'})
     transactionMonobankId: number
 
-    @Column()
+    @Column({comment: 'Дата і час операції'})
     operationDate: Date
 
-    @Column()
+    @Column({comment: 'Деталі операції'})
     memo: string
 
-    @Column()
-    mcc: number
+    @Column({comment: 'Merchant Category Code (MCC) – код категорії продавця'})
+    mcc: string
 
-    @Column()
+    @Column({type: 'decimal', precision: 16, scale: 4, comment: 'Сума в валюті картки (UAH)'})
     amount: number
 
-    @Column()
+    @Column({type: 'decimal', precision: 16, scale: 4, comment: 'Сума в валюті операції'})
     operationAmount: number
 
-    @Column()
-    operationCurrency: number
+    @Column({comment: 'Валюта операції (наприклад, USD, EUR)'})
+    operationCurrency: string
 
-    @Column()
-    exchangeRate: number
+    @Column({type: 'decimal', precision: 16, scale: 4, nullable: true, comment: 'Курс обміну для конвертації у валюту картки'})
+    exchangeRate?: number
 
-    @Column()
+    @Column({type: 'decimal', precision: 16, scale: 4, nullable: true, comment: 'Сума комісій (UAH)'})
     commissionAmount: number
 
-    @Column()
+    @Column({type: 'decimal', precision: 16, scale: 4, nullable: true, comment: 'Сума кешбеку (UAH)'})
     cashbackAmount: number
 
-    @Column()
+    @Column({type: 'decimal', precision: 16, scale: 4, comment: 'Залишок після операції (UAH)'})
     balanceAfter: number
 
-    @Column()
+    @Column({comment: 'Контрольна сума транзакції', unique: true})
     checksum: string
 
-    @CreateDateColumn()
+    @CreateDateColumn({comment: 'Дата створення запису'})
     createdAt: Date
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({comment: 'Дата останнього оновлення запису'})
     updatedAt: Date
 
     @BeforeInsert()
     async setChecksum() {
-        this.checksum = await sha256sum(
+        this.checksum = await Helpers.sha256sum(
             `${this.operationDate.getDate()}_${this.mcc}_${this.amount}_${this.balanceAfter}`,
             false
         )

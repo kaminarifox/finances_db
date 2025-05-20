@@ -1,13 +1,13 @@
 import { CronJob } from "cron"
-import { parseFile } from '@fast-csv/parse';
-import { ExtractionsExplorer } from "../helpers/extractions-explorer";
 import { AppDataSource } from "../data-source";
 import { ExtractionLog } from "../entity/extraction_log";
-import { plainToInstance } from "class-transformer";
 import { TransactionPrivatbank } from "../entity/transaction_privatbank";
-import { PrivatbankExtraction } from "../models/privatbank-extraction";
+import { plainToInstance } from "class-transformer";
+import { Helpers } from "../helpers";
+import * as XLSX from 'xlsx'
+import { DateTime } from "luxon";
 
-const headers = [
+const header = [
     'operationDate',
     'category',
     'cardNumber',
@@ -20,27 +20,8 @@ const headers = [
     'balanceCurrency'
 ]
 
-const parseCsv = (path: string) => new Promise((resolve, reject) => {
-    const entities: TransactionPrivatbank[] = []
-    parseFile(path, { headers, renameHeaders: true, skipLines: 2 })
-        .transform(row => {
-            Object.keys(row).forEach(key => {
-                row[key] = row[key] == '' ? null : row[key]
-            })
-            return plainToInstance(PrivatbankExtraction, row)
-        })
-        .on('error', error => { reject(error) })
-        .on('data', row => {
-            entities.push(TransactionPrivatbank.create(row))
-        })
-        .on('end', (rowCount: number) => {
-            resolve(entities)
-        });
-})
-
-
 const job = async () => {
-    const files = await ExtractionsExplorer.listExtractions('privatbank')
+    const files = await Helpers.listExtractions('privatbank', 'xlsx')
     for (const { path, checksum } of files) {
         console.log(`Processing ${path} : ${checksum}`)
         if (await ExtractionLog.countBy({ checksum })) {
@@ -48,7 +29,12 @@ const job = async () => {
             continue
         };
 
-        const entities = await parseCsv(path)
+        const workbook = XLSX.readFile(path)
+        const entities = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header, range: 2 }).map((row) => {
+            row['operationDate'] = DateTime.fromFormat(row['operationDate'], 'dd.mm.yyyy TT').toJSDate()
+            return plainToInstance(TransactionPrivatbank, row)
+        })
+
         await AppDataSource.manager.save(entities).catch(error => {
             console.error(error)
         })
@@ -59,7 +45,7 @@ const job = async () => {
 }
 
 export const importPrivatbankJob = CronJob.from({
-    cronTime: '0 * * * * *',
+    cronTime: '30 * * * * *',
     onTick: job,
     waitForCompletion: true,
     timeZone: 'Europe/Kyiv'

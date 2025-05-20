@@ -1,13 +1,10 @@
 import { CronJob } from "cron"
-import { parse, parseFile } from '@fast-csv/parse';
-import { TransactionMonobank } from "../entity/transaction_monobank";
-import { ExtractionsExplorer } from "../helpers/extractions-explorer";
 import { AppDataSource } from "../data-source";
 import { ExtractionLog } from "../entity/extraction_log";
-import { DateTime } from "luxon";
+import { TransactionMonobank } from "../entity/transaction_monobank";
 import { plainToInstance } from "class-transformer";
-import { MonobankExtraction } from "../models/monobak-extraction";
-import { error } from "console";
+import { Helpers } from "../helpers";
+import { DateTime } from "luxon";
 
 const headers = [
     'operationDate',
@@ -22,27 +19,8 @@ const headers = [
     'balanceAfter'
 ]
 
-const parseCsv = (path: string) => new Promise((resolve, reject) => {
-    const entities: TransactionMonobank[] = []
-    parseFile(path, { headers, renameHeaders: true })
-        .transform(row => {
-            Object.keys(row).forEach(key => {
-                row[key] = row[key] === '—' ? null : row[key]
-            })
-            return plainToInstance(MonobankExtraction, row)
-        })
-        .on('error', error => { reject(error) })
-        .on('data', row => {
-            entities.push(TransactionMonobank.create(row))
-        })
-        .on('end', (rowCount: number) => {
-            resolve(entities)
-        });
-})
-
-
 const job = async () => {
-    const files = await ExtractionsExplorer.listExtractions('monobank')
+    const files = await Helpers.listExtractions('monobank')
     for (const { path, checksum } of files) {
         console.log(`Processing ${path} : ${checksum}`)
         if (await ExtractionLog.countBy({ checksum })) {
@@ -50,7 +28,11 @@ const job = async () => {
             continue
         };
 
-        const entities = await parseCsv(path)
+        const entities = await Helpers.parseCsv(path, headers, '—').then(items => items.map(row => {
+            row['operationDate'] = DateTime.fromFormat(row['operationDate'] as string, 'dd.mm.yyyy TT').toJSDate()
+            return plainToInstance(TransactionMonobank, row)
+        }))
+
         await AppDataSource.manager.save(entities).catch(error => {
             console.error(error)
         })
@@ -61,7 +43,7 @@ const job = async () => {
 }
 
 export const importMonobankJob = CronJob.from({
-    cronTime: '30 * * * * *',
+    cronTime: '0 * * * * *',
     onTick: job,
     waitForCompletion: true,
     timeZone: 'Europe/Kyiv'

@@ -6,7 +6,7 @@ services:
     working_dir: /home/node/app
     volumes:
       - ./manager:/home/node/app:bind
-      - ./extractions:/home/node/app/extractions:bind
+      - ./extractions:/home/node/extractions:bind
     command: "npm run start:dev"
     env_file: .env
 
@@ -25,20 +25,21 @@ services:
       - 'pgadmin_data:/var/lib/pgadmin'
     env_file: .env
 
-  metabase:
-    image: metabase/metabase
-    ports:
-      - '3000:3000'
-    volumes:
-      - /dev/urandom:/dev/random:ro
-    env_file: .env
-
+  # metabase:
+  #   image: metabase/metabase
+  #   ports:
+  #     - '3000:3000'
+  #   volumes:
+  #     - /dev/urandom:/dev/random:ro
+  #   env_file: .env
 
 volumes:
   postgresql_data:
     name: finances_db_postgresql_data
   pgadmin_data:
     name: finances_db_pgadmin_data
+  mail_data:
+    name: finances_db_mail_data
 
 networks:
   default:

@@ -19,3 +19,5 @@ yarn-error.log*
 pnpm-debug.log*
 
 extractions/**/*/*.csv
+extractions/**/*/*.xlsx
+extractions/**/*/*.pdf
